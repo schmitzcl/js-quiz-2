@@ -95,9 +95,11 @@
 
             if (inside) {
                 var popLocation = e.latlng;
-                L.popup()
+                L.popup({ maxWidth: 600 })
                     .setLatLng(popLocation)
-                    .setContent('<p>Ouuuuuuuiiiii')
+                    .setContent('<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm" title="YouTube video player"\n' +
+                        '        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"\n' +
+                        '        referrerpolicy="strict-origin-when-cross-origin"></iframe>')
                     .openOn(map);
             }
         });
@@ -108,9 +110,6 @@
     });</script>
 </div>
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm" title="YouTube video player"
-        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </script>
 </body>
 
