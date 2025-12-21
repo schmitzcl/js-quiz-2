@@ -36,8 +36,18 @@
         padding: 20px;
     }
 
-    #map {
+    #content {
+        display: flex;
+        flex-direction: column;
         height: 100vh;
+    }
+
+    #content #header {
+        flex: 0 0 auto;
+    }
+
+    #map {
+        flex: 1 1 auto;
     }
 </style>
 
@@ -47,7 +57,11 @@
         <button onclick="document.getElementById('messagePopup').style.display = 'none';">X</button>
     </div>
 </div>
-<div id="map"></div>
+
+<div id="content">
+    <div id="header"></div>
+    <div id="map"></div>
+</div>
 
 <script type="text/javascript">
     var messageTimeout = setTimeout(() => {
@@ -59,7 +73,8 @@
             48.8626304852, 2.33629344655
         ], 6);
 
-        var tuileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+        // var tuileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+        var tuileUrl = 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
 
         var osm = L.tileLayer(tuileUrl, {
             minZoom: 0,
@@ -105,11 +120,13 @@
                     clearTimeout(messageTimeout);
                 }
 
+                var videoWidth = window.screen.width;
+                var videoHeight = videoWidth / 16 * 9;
                 var popLocation = e.latlng;
 
-                L.popup({ maxWidth: 600 })
+                L.popup({ maxWidth: videoWidth })
                     .setLatLng(popLocation)
-                    .setContent('<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm&rel=0&autoplay=1" title="YouTube video player"\n' +
+                    .setContent('<iframe width="' + videoWidth + '" height="' + videoHeight + '" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm&rel=0&autoplay=1" title="YouTube video player"\n' +
                         '        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"\n' +
                         '        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>')
                     .openOn(map);
