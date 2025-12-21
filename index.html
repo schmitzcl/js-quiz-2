@@ -7,18 +7,57 @@
 <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 
 <style>
+    #messagePopup {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: rgba(0, 0, 0, 0.4);
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 10000;
+        font-size: 24px;
+    }
+
+    #messagePopup #messagePopupText {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffffff;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    #messagePopup #messagePopupText button {
+        padding: 20px;
+    }
+
     #map {
         height: 100vh;
     }
 </style>
 
+<div id="messagePopup">
+    <div id="messagePopupText">
+        <p>Dépêche toi!!!</p>
+        <button onclick="document.getElementById('messagePopup').style.display = 'none';">X</button>
+    </div>
+</div>
 <div id="map"></div>
 
 <script type="text/javascript">
+    var messageTimeout = setTimeout(() => {
+        document.getElementById('messagePopup').style.display = 'flex';
+    }, 10000);
+
     function InitialiserCarte() {
         var map = L.map('map').setView([
             48.8626304852, 2.33629344655
-        ], 5);
+        ], 6);
 
         var tuileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 
@@ -94,10 +133,15 @@
             const inside = turf.booleanPointInPolygon(point, vienneGeoJson);
 
             if (inside) {
+                if (messageTimeout) {
+                    clearTimeout(messageTimeout);
+                }
+
                 var popLocation = e.latlng;
+
                 L.popup({ maxWidth: 600 })
                     .setLatLng(popLocation)
-                    .setContent('<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm" title="YouTube video player"\n' +
+                    .setContent('<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm&autoplay=1" title="YouTube video player"\n' +
                         '        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"\n' +
                         '        referrerpolicy="strict-origin-when-cross-origin"></iframe>')
                     .openOn(map);
