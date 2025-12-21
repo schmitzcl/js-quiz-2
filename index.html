@@ -87,40 +87,8 @@
             }
         };
 
-        new L.GeoJSON.AJAX(['https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson'], {
-            // style: function (feature) {
-            //     switch (feature.properties.code) {
-            //         case '16':
-            //         case '22':
-            //         case '29':
-            //         case '35':
-            //         case '37':
-            //         case '44':
-            //         case '49':
-            //         case '56':
-            //         case '79':
-            //         case '85':
-            //         case '86':
-            //             return { color: "#ffed00" };
-            //
-            //         case '02':
-            //         case '14':
-            //         case '27':
-            //         case '28':
-            //         case '50':
-            //         case '53':
-            //         case '59':
-            //         case '60':
-            //         case '61':
-            //         case '62':
-            //         case '72':
-            //         case '76':
-            //         case '78':
-            //         case '80':
-            //             return { color: "#ef8200" };
-            //     }
-            // }
-        }).addTo(map);
+        new L.GeoJSON.AJAX(['https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson'], {})
+            .addTo(map);
 
         map.on('click', function(e) {
             const lat = e.latlng.lat;
@@ -141,9 +109,9 @@
 
                 L.popup({ maxWidth: 600 })
                     .setLatLng(popLocation)
-                    .setContent('<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm&autoplay=1" title="YouTube video player"\n' +
+                    .setContent('<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm&rel=0&autoplay=1" title="YouTube video player"\n' +
                         '        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"\n' +
-                        '        referrerpolicy="strict-origin-when-cross-origin"></iframe>')
+                        '        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>')
                     .openOn(map);
             }
         });
