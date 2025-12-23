@@ -256,7 +256,7 @@
 
 <div id="messagePopup">
     <div id="messagePopupText">
-        <p>On n'a pas toute la journée !! &#128540;</p>
+        <p id="messagePopupTextContent">On n'a pas toute la journée !! &#128540;</p>
         <button onclick="document.getElementById('messagePopup').style.display = 'none';">X</button>
     </div>
 </div>
@@ -273,8 +273,10 @@
 
 <script type="text/javascript">
     var messageTimeout = setTimeout(() => {
-        document.getElementById('messagePopup').style.display = 'flex';
+        showMessagePopup('On n\'a pas toute la journée !! &#128540;');
     }, 120000);
+
+    var wronglyGuessedDepartments = new Set();
 
     function InitialiserCarte() {
         var map = L.map('map').setView([
@@ -291,27 +293,24 @@
 
         osm.addTo(map);
 
-        const vienneGeoJson = {
-            'type': 'Feature',
-            'properties': { 'name': 'Vienne' },
-            'geometry': {
-                'type': 'Polygon',
-                'coordinates': [[
-                    [0.043, 46.984],
-                    [0.498, 47.035],
-                    [0.835, 46.862],
-                    [0.916, 46.478],
-                    [0.687, 46.212],
-                    [0.243, 46.189],
-                    [-0.086, 46.394],
-                    [-0.091, 46.718],
-                    [0.043, 46.984]
-                ]]
+        getDepartmentStyle = function(feature) {
+            if (wronglyGuessedDepartments.has(feature.properties.code)) {
+                return { color: "#ff0000", weight: 2, fillOpacity: 0.1 };
             }
+            // Default style when not in the wrong departments
+            return {
+                color: '#3388ff',
+                weight: 1,
+                fillOpacity: 0.2
+            };
         };
 
-        new L.GeoJSON.AJAX(['https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson'], {})
-            .addTo(map);
+        departmentsLayer = new L.GeoJSON.AJAX(
+            ['https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson'],
+            {
+                style: getDepartmentStyle
+            }
+        ).addTo(map);
 
         map.on('click', function(e) {
             const lat = e.latlng.lat;
@@ -320,28 +319,78 @@
             // Create a Turf point
             const point = turf.point([lng, lat]);
 
-            // Check if inside Vienne
-            const inside = turf.booleanPointInPolygon(point, vienneGeoJson);
+            // Check which department was clicked
+            let clickedDepartment = null;
 
-            if (inside) {
-                if (messageTimeout) {
-                    clearTimeout(messageTimeout);
+            departmentsLayer.eachLayer(function(layer) {
+                if (turf.booleanPointInPolygon(point, layer.feature)) {
+                    clickedDepartment = layer.feature.properties;
+                    return false; // Exit the loop once we find a match
                 }
+            });
 
-                var videoWidth = window.screen.width - 50;
-                var videoHeight = videoWidth / 16 * 9;
-                var popLocation = e.latlng;
+            if (!clickedDepartment || !clickedDepartment.code) {
+                return;
+            }
 
-                L.popup({ maxWidth: videoWidth, closeOnClick: false })
-                    .setLatLng(popLocation)
-                    .setContent('<iframe width="' + videoWidth + '" height="' + videoHeight + '" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm&rel=0&autoplay=1" title="YouTube video player"\n' +
-                        '        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"\n' +
-                        '        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>')
-                    .openOn(map);
-
-                document.getElementsByClassName('pyro')[0].style.display = 'block';
+            if (clickedDepartment.code == 86) {
+                handleGameWin(e.latlng);
+            } else {
+                handleWrongDepartmentClick(clickedDepartment);
             }
         });
+
+        function handleGameWin(popupLocation) {
+            clearMessages();
+
+            // show video popup
+            var videoWidth = window.screen.width - 50;
+            var videoHeight = videoWidth / 16 * 9;
+
+            L.popup({ maxWidth: videoWidth, closeOnClick: false })
+                .setLatLng(popupLocation)
+                .setContent('<iframe width="' + videoWidth + '" height="' + videoHeight + '" src="https://www.youtube-nocookie.com/embed/lJ6coOOoD3c?si=N1bEcJhZBtuLHCUm&rel=0&autoplay=1" title="YouTube video player"\n' +
+                    '        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"\n' +
+                    '        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>')
+                .openOn(map);
+
+            showPyro();
+        }
+
+        function handleWrongDepartmentClick(department) {
+            if (!department || !department.code) {
+                return;
+            }
+
+            wronglyGuessedDepartments.add(department.code);
+            updateDepartmentStyles();
+
+            if (wronglyGuessedDepartments.size === 3) {
+                showMessagePopup('Ne clique pas partout, il faut réfléchir !! &#128540;')
+            }
+        }
+
+        function updateDepartmentStyles() {
+            departmentsLayer.eachLayer(function(layer) {
+                layer.setStyle(getDepartmentStyle(layer.feature));
+            });
+        }
+    }
+
+    function showPyro() {
+        document.getElementsByClassName('pyro')[0].style.display = 'block';
+    }
+
+    function showMessagePopup(message) {
+        document.getElementById('messagePopupTextContent').innerHTML = message;
+        document.getElementById('messagePopup').style.display = 'flex';
+    }
+
+    function clearMessages() {
+        // Clear any message timeout
+        if (messageTimeout) {
+            clearTimeout(messageTimeout);
+        }
     }
 
     $(document).ready(function() {
